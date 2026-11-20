@@ -146,6 +146,16 @@ export function Services() {
           <div
             key={p.n}
             className="proc-step"
+            role="button"
+            tabIndex={0}
+            aria-pressed={hoveredStep === p.n}
+            onClick={() => setHoveredStep((cur) => (cur === p.n ? null : p.n))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setHoveredStep((cur) => (cur === p.n ? null : p.n));
+              }
+            }}
             onPointerEnter={() => setHoveredStep(p.n)}
             onPointerLeave={() => {
               setHoveredStep((cur) => (cur === p.n ? null : cur));
@@ -353,10 +363,24 @@ export function Motto({ onBreak, broken }: { onBreak: () => void; broken: boolea
       s = st.current;
     s.tx = e.clientX - r.left;
     s.ty = e.clientY - r.top;
-    s.tr = 320;
+    s.tr = Math.min(320, Math.max(150, r.width * 0.42));
     if (s.x < -900) {
       s.x = s.tx;
       s.y = s.ty;
+    }
+  };
+  const toggleTap = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    const s = st.current;
+    if (s.tr > 20) {
+      s.tr = 0;
+    } else {
+      s.tx = r.width / 2;
+      s.ty = r.height / 2;
+      s.x = s.tx;
+      s.y = s.ty;
+      s.tr = Math.min(320, Math.max(150, r.width * 0.42));
     }
   };
   return (
@@ -366,6 +390,7 @@ export function Motto({ onBreak, broken }: { onBreak: () => void; broken: boolea
         <div
           ref={ref}
           className="lens"
+          onClick={toggleTap}
           onPointerMove={move}
           onPointerLeave={() => {
             st.current.tr = 0;
@@ -384,7 +409,7 @@ export function Motto({ onBreak, broken }: { onBreak: () => void; broken: boolea
             </div>
           </div>
         </div>
-        <p className="motto-hint">Hover to read the honest version</p>
+        <p className="motto-hint">Hover or tap to read the honest version</p>
         <div className="motto-actions">
           <button className="pill pill-accent" onClick={onBreak}>
             {broken ? 'Fix it' : 'Break it'}
