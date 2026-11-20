@@ -149,13 +149,15 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
               rawLum[idx + w + 1]) /
             9;
 
-          // Gentle local contrast so eyes, nose, and smile stay smooth and natural
+          // Gentle local contrast + lifted brightness curve so dark clothing & hair read bright & crisp
           const detail = rawLum[idx] + (rawLum[idx] - blur) * 0.65;
-          const curved = Math.pow(Math.min(1, Math.max(0.04, detail)), 0.85) * a;
+          const curved = (forLightBg
+            ? Math.pow(Math.min(1, Math.max(0.04, detail)), 0.85)
+            : Math.pow(Math.min(1, Math.max(0.08, detail)), 0.52)) * a;
 
           const nx = (x / w) * 2 - 1;
           const ny = ((y / h) * 2 - 1) * aspect;
-          pts.push({ x: nx, y: ny, lum: Math.min(1, Math.max(0.06, curved)) });
+          pts.push({ x: nx, y: ny, lum: Math.min(1, Math.max(0.14, curved)) });
         }
       }
 
@@ -176,7 +178,7 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
           ],
           i * 3
         );
-        size[i] = 0.6 + p.lum * 1.55;
+        size[i] = 0.9 + p.lum * 1.4;
         lum[i] = p.lum;
       }
       resolve({ pos, size, lum });
@@ -252,7 +254,7 @@ export function ParticleMorph({ onStats }: { onStats?: (s: { fps: number; count:
           float d = length(gl_PointCoord - 0.5);
           float a = smoothstep(0.5, 0.28, d);
           vec3 c = vSeed > 0.985 ? uAccent : uColor;
-          float lumAlpha = 0.16 + vLum * 0.84;
+          float lumAlpha = 0.42 + vLum * 0.58;
           gl_FragColor = vec4(c, a * uAlpha * lumAlpha);
         }
       `,
