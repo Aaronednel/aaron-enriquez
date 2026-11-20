@@ -19,6 +19,7 @@ export const SITE = {
   instagram: 'https://instagram.com/aaronednel',
   instagramHandle: '@aaronednel',
   facebookName: 'Aaron Enriquez',
+  resumeUrl: '/Aaron_Ednel_Enriquez_Resume.pdf',
   portraitUrl: '/portrait.png',
   hero: {
     title: 'Software you never have to think about.',
@@ -38,7 +39,7 @@ export const SITE = {
         b: false,
       },
     ],
-    body: 'IT graduate passionate about turning complex problems into simple, dependable digital products. I love building full-stack applications where thoughtful UI meets solid backend engineering. Currently focused on shipping modern web apps and scalable tools.',
+    body: '4th-year BSIT student at the University of the Assumption (Class of 2027) passionate about turning complex problems into simple, dependable digital products. I love building full-stack applications where thoughtful UI meets solid backend engineering.',
     stats: [
       { value: '4+', unit: 'projects', label: 'built end-to-end' },
       { value: '10+', unit: 'technologies', label: 'in core stack' },
@@ -114,28 +115,49 @@ export interface Project {
 export const PROJECTS: Project[] = [
   {
     n: '01',
-    title: 'AES Parish Appointment System',
+    title: 'ParishLink',
     blurb:
-      'Appointment requests, inquiries and admin handling for a parish, through a mobile app and a web admin interface.',
-    meta: 'Mobile app · Web admin',
-    tag: 'Full-Stack System',
+      'Digital sacramental appointment and inquiry platform designed for 8 parishes under the Vicariate of St. John Mary Vianney.',
+    meta: 'BSIT Capstone Project',
+    tag: 'Project Leader',
     problem:
-      'Manual booking and scattered inquiries caused scheduling conflicts and slow responses.',
+      'Parish staff and clergy needed a unified, conflict-free way to handle sacramental bookings, walk-ins, and parishioner inquiries across multiple parishes.',
     solution:
-      'A mobile request flow paired with a web administration panel for reviewing schedules and managing inquiries.',
+      'Led a 3-member team after stakeholder interviews to design a simplified single-parish staff dashboard, conflict-aware scheduling workflow, and walk-in queue module.',
     features: [
-      'Appointment request and scheduling workflows',
-      'Inquiry tracking and real-time status updates',
-      'Web admin interface for parish staff',
-      'Mobile client interface for parishioners',
+      'Conflict-aware sacramental appointment scheduling',
+      'Simplified single-parish staff dashboard',
+      'Walk-in queue & parishioner inquiry module',
+      'AI-assisted inquiry support via Google Gemini API',
     ],
-    tech: ['React', 'JavaScript', 'REST APIs', 'Firebase'],
-    role: 'Full-Stack Developer — designed the UI, built the booking and scheduling workflows, and integrated the backend database and APIs end-to-end.',
+    tech: ['TypeScript', 'JavaScript', 'PostgreSQL', 'Google Gemini API'],
+    role: 'Project Leader & Full-Stack Developer — led a 3-member capstone team, conducted stakeholder interviews, and architected the core scheduling and inquiry workflows.',
     live: '',
     repo: '',
   },
   {
     n: '02',
+    title: 'Dean Appointment System',
+    blurb:
+      'Appointment scheduling system built for AES to organize student and administrative appointment workflows.',
+    meta: 'Academic Project · Feb 2026',
+    tag: 'System Development',
+    problem:
+      'Manual appointment booking and scattered inquiries caused scheduling conflicts and slow responses.',
+    solution:
+      'Built an organized scheduling workflow and user-facing interface to streamline appointment requests and administrative review.',
+    features: [
+      'Structured appointment request and scheduling workflows',
+      'Organized administrative review and status tracking',
+      'User-facing scheduling interface',
+    ],
+    tech: ['React', 'JavaScript', 'REST APIs', 'Firebase'],
+    role: 'Full-Stack Developer — assisted in planning system workflows, building scheduling features, and presenting the solution.',
+    live: '',
+    repo: '',
+  },
+  {
+    n: '03',
     title: 'Arwee Photography and Films',
     blurb:
       'A photography and videography website for event coverage, portfolios and customer inquiries.',
@@ -157,7 +179,7 @@ export const PROJECTS: Project[] = [
     repo: 'https://github.com/Aaronednel/arwee-photography',
   },
   {
-    n: '03',
+    n: '04',
     title: 'Aaron Enriquez',
     blurb:
       'Built this site from the ground up with a focus on clean design, smooth performance, and software that feels effortless to use.',

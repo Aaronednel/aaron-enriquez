@@ -737,6 +737,38 @@ export function Contact({ go }: { go: (id: string) => void }) {
           }}
         />
       </div>
+
+      <div className="resume-wrap">
+        <div className="resume-label">MY RESUME</div>
+        <div className="resume-card">
+          <div className="resume-left">
+            <span className="resume-avatar" aria-hidden="true">
+              AE
+            </span>
+            <div>
+              <div className="resume-title">
+                Aaron Ednel M. Enriquez — BSIT Student (Class of 2027) · University of the Assumption
+              </div>
+              <div className="resume-sub">
+                ParishLink Capstone Project Leader · Crew Member @ McDonald&apos;s JBL
+              </div>
+            </div>
+          </div>
+          <div className="resume-right">
+            <span className="resume-meta">PDF · 1 Page</span>
+            <a
+              href={SITE.resumeUrl}
+              download="Aaron_Ednel_Enriquez_Resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="resume-dl"
+            >
+              Download CV ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div className="footer-bar">
         <div>
           <h6>Contact</h6>
