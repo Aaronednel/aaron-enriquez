@@ -107,7 +107,8 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
     const img = new Image();
     img.onload = () => {
       const aspect = img.height / img.width;
-      const w = 175;
+      // Choose grid width so total opaque points fit cleanly inside particle budget N
+      const w = n >= 18000 ? 185 : 115;
       const h = Math.round(w * aspect);
       const c = document.createElement('canvas');
       c.width = w;
@@ -125,7 +126,6 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
           const k = idx * 4;
           alphaBuf[idx] = d[k + 3] / 255;
           const l = (0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2]) / 255;
-          // On light background, dark pixels (glasses, eyes, beard, shadows) are high ink density
           rawLum[idx] = forLightBg ? 1.0 - l * 0.88 : l;
         }
       }
@@ -135,7 +135,7 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
         for (let x = 1; x < w - 1; x++) {
           const idx = y * w + x;
           const a = alphaBuf[idx];
-          if (a < 0.15) continue;
+          if (a < 0.18) continue;
 
           const blur =
             (rawLum[idx - w - 1] +
@@ -149,14 +149,13 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
               rawLum[idx + w + 1]) /
             9;
 
-          const detail = rawLum[idx] + (rawLum[idx] - blur) * 2.2;
-          const curved = Math.pow(Math.min(1, Math.max(0.05, detail)), 0.82) * a;
-
-          if (curved < 0.12 && Math.random() > curved * 5.5) continue;
+          // Gentle local contrast so eyes, nose, and smile stay smooth and natural
+          const detail = rawLum[idx] + (rawLum[idx] - blur) * 0.65;
+          const curved = Math.pow(Math.min(1, Math.max(0.04, detail)), 0.85) * a;
 
           const nx = (x / w) * 2 - 1;
           const ny = ((y / h) * 2 - 1) * aspect;
-          pts.push({ x: nx, y: ny, lum: Math.min(1, Math.max(0.08, curved)) });
+          pts.push({ x: nx, y: ny, lum: Math.min(1, Math.max(0.06, curved)) });
         }
       }
 
@@ -167,20 +166,17 @@ function loadPortrait(url: string, n: number, forLightBg = false): Promise<Shape
       const lum = new Float32Array(n);
 
       for (let i = 0; i < n; i++) {
-        const p =
-          i < pts.length
-            ? pts[i]
-            : pts[Math.floor(rand(pts.length))];
-        const jitter = i < pts.length ? 0.0035 : 0.008;
+        const p = pts[i % pts.length];
+        const jitter = i < pts.length ? 0.0018 : 0.0035;
         pos.set(
           [
             p.x + (rand(2) - 1) * jitter,
             p.y + (rand(2) - 1) * jitter,
-            (p.lum - 0.5) * 0.06,
+            (p.lum - 0.5) * 0.04,
           ],
           i * 3
         );
-        size[i] = 0.55 + p.lum * 1.85;
+        size[i] = 0.6 + p.lum * 1.55;
         lum[i] = p.lum;
       }
       resolve({ pos, size, lum });
@@ -198,7 +194,7 @@ export function ParticleMorph({ onStats }: { onStats?: (s: { fps: number; count:
     if (!el) return;
     const mobile = window.innerWidth < 800;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const N = mobile ? 7000 : 18000;
+    const N = mobile ? 9000 : 22000;
     let W = window.innerWidth, H = window.innerHeight;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
@@ -396,10 +392,6 @@ export function ParticleMorph({ onStats }: { onStats?: (s: { fps: number; count:
           if (!reduced && !isPortrait) {
             tx += Math.sin(t + seeds[i] * 40) * 0.8;
             ty += Math.cos(t * 0.9 + seeds[i] * 40) * 0.8;
-          } else if (!reduced && isPortrait) {
-            // Very subtle breathing motion so facial features stay sharp
-            tx += Math.sin(t * 1.1 + seeds[i] * 30) * 0.22;
-            ty += Math.cos(t * 1.0 + seeds[i] * 30) * 0.22;
           }
         }
         const k = (reduced ? 0.2 : 0.045) + seeds[i] * 0.07;
