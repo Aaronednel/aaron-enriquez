@@ -46,7 +46,7 @@ header.navbar { position: relative; z-index: 55; }
 
 /* Navbar */
 .navbar { height: 88px; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 400; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: clamp(1.15rem, 1.45vw, 1.4rem); font-weight: 600; letter-spacing: -0.03em; transition: color .2s; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: clamp(0.95rem, 1.1vw, 1.1rem); font-weight: 600; letter-spacing: -0.03em; transition: color .2s; }
 .brand:hover { color: #a9abff; }
 .dots2 { display: inline-flex; gap: 4px; align-items: center; } .dots2 i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px rgba(91, 95, 224, 0.55); display: block; }
 .nav-links { display: flex; gap: 32px; margin-left: auto; margin-right: 40px; font-family: var(--font-display); font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }

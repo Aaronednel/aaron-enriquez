@@ -49,7 +49,7 @@ export function Hero({ go }: { go: (id: string) => void }) {
     <section id="top" data-theme="dark" data-label="hero" className="hero grid12">
       <div className="hero-left">
         <div className="location">
-          <Globe size={64} />
+          <Globe size={104} />
           <div>
             <div>
               <b>{SITE.shortLocation}</b>

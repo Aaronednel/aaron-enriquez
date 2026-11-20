@@ -1,6 +1,56 @@
 import { useEffect, useRef } from 'react';
 
-/** Small rotating dotted globe (2D canvas). */
+type LonLat = [number, number];
+
+// Simplified continent outlines (lon, lat) used to decide which particles are land.
+const LAND: LonLat[][] = [
+  // North America
+  [[-168,66],[-156,71],[-140,70],[-125,70],[-110,73],[-95,72],[-82,69],[-80,63],[-90,58],[-94,59],[-80,52],[-78,57],[-72,61],[-65,60],[-60,55],[-56,52],[-66,45],[-70,42],[-74,40],[-76,35],[-81,31],[-80,26],[-82,29],[-85,30],[-90,29],[-94,29],[-97,26],[-97,21],[-94,18],[-90,21],[-87,21],[-88,16],[-84,15],[-83,10],[-79,9],[-77,8],[-80,7],[-84,9],[-87,13],[-92,15],[-96,16],[-105,20],[-109,25],[-113,31],[-117,32],[-121,35],[-124,40],[-124,48],[-128,51],[-133,55],[-140,60],[-148,60],[-152,58],[-158,56],[-164,55],[-162,59],[-166,62]],
+  // South America
+  [[-78,8],[-72,12],[-62,10],[-52,5],[-50,0],[-44,-2],[-35,-5],[-35,-9],[-39,-14],[-41,-22],[-48,-26],[-53,-34],[-58,-38],[-62,-40],[-65,-45],[-68,-52],[-70,-55],[-74,-52],[-74,-44],[-72,-36],[-71,-28],[-70,-18],[-76,-14],[-81,-6],[-80,-1],[-78,2]],
+  // Eurasia
+  [[-9,37],[-9,43],[-1,46],[-4,48],[2,51],[8,54],[8,57],[10,58],[6,62],[14,68],[22,70],[30,70],[40,67],[44,68],[60,69],[70,73],[80,73],[100,77],[113,74],[130,71],[140,72],[160,70],[170,70],[180,68],[180,65],[170,60],[163,58],[157,51],[156,57],[142,59],[135,55],[141,52],[140,48],[132,43],[129,41],[127,38],[126,35],[121,40],[122,37],[119,35],[122,30],[120,25],[110,21],[108,16],[106,10],[104,9],[100,13],[99,8],[103,1],[98,8],[98,15],[94,17],[91,22],[88,22],[86,20],[80,15],[78,9],[76,9],[73,17],[72,21],[68,23],[66,25],[57,25],[56,27],[50,30],[48,30],[50,26],[56,26],[59,23],[55,17],[44,13],[43,16],[39,22],[35,28],[34,31],[36,36],[27,37],[23,36],[20,40],[16,40],[12,44],[8,44],[3,43],[0,39],[-5,36]],
+  // Africa
+  [[-17,21],[-16,28],[-9,32],[-6,36],[10,37],[11,33],[20,31],[25,32],[32,30],[33,27],[37,22],[39,16],[43,12],[51,12],[48,5],[41,-2],[40,-10],[40,-15],[35,-20],[35,-25],[32,-29],[27,-34],[20,-35],[18,-32],[14,-23],[12,-14],[13,-6],[9,-1],[10,4],[5,5],[-4,5],[-8,4],[-13,8],[-17,14]],
+  // Australia
+  [[114,-22],[122,-18],[130,-12],[137,-12],[136,-15],[141,-17],[142,-11],[146,-19],[153,-26],[151,-34],[146,-39],[140,-38],[135,-34],[131,-31],[124,-33],[115,-34],[114,-26]],
+  // Greenland
+  [[-55,60],[-44,60],[-20,70],[-18,80],[-35,83],[-60,82],[-70,78],[-58,75],[-52,68]],
+  // British Isles
+  [[-5,50],[1,51],[2,53],[-2,56],[-3,58],[-6,58],[-5,54],[-3,53],[-5,52]],
+  // Japan
+  [[130,31],[134,34],[140,35],[142,40],[141,45],[139,40],[136,36],[131,34]],
+  // Sumatra, Borneo, Java, New Guinea
+  [[95,5],[98,4],[104,-2],[106,-6],[102,-4],[96,2]],
+  [[109,1],[117,7],[119,1],[116,-3],[110,-3]],
+  [[105,-6],[114,-8],[108,-8]],
+  [[131,-1],[141,-3],[150,-10],[141,-9],[135,-4]],
+  // Philippines: Luzon, Visayas, Mindanao
+  [[120,18],[122,18],[122,14],[120,14]],
+  [[122,11],[125,12],[125,10],[122,10]],
+  [[122,8],[126,9],[126,6],[123,7]],
+  // Madagascar, New Zealand
+  [[44,-25],[50,-15],[47,-13],[43,-22]],
+  [[172,-34],[178,-38],[174,-41],[166,-46],[170,-44]],
+];
+
+function inPoly(lon: number, lat: number, poly: LonLat[]): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if (yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function isLand(lon: number, lat: number): boolean {
+  if (lat < -70) return true; // Antarctica
+  for (const p of LAND) if (inPoly(lon, lat, p)) return true;
+  return false;
+}
+
+/** Rotating particle Earth: land masses are dense bright dots, oceans are faint. Centred on the Philippines. */
 export function Globe({ size = 64 }: { size?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -11,35 +61,83 @@ export function Globe({ size = 64 }: { size?: number }) {
     c.height = size * dpr;
     const ctx = c.getContext('2d')!;
     ctx.scale(dpr, dpr);
-    const pts: number[][] = [];
-    const n = 420;
+
+    const n = Math.round(size * size * 0.42);
+    const pts: { x: number; y: number; z: number; land: boolean }[] = [];
     for (let i = 0; i < n; i++) {
-      const phi = Math.acos(1 - (2 * (i + 0.5)) / n),
-        th = Math.PI * (1 + Math.sqrt(5)) * i;
-      pts.push([Math.sin(phi) * Math.cos(th), Math.cos(phi), Math.sin(phi) * Math.sin(th)]);
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / n);
+      const th = Math.PI * (1 + Math.sqrt(5)) * i;
+      const x = Math.sin(phi) * Math.cos(th);
+      const y = Math.cos(phi);
+      const z = Math.sin(phi) * Math.sin(th);
+      const lat = (Math.asin(y) * 180) / Math.PI;
+      let lon = (Math.atan2(x, z) * 180) / Math.PI; // lon 0 faces +z
+      if (lon > 180) lon -= 360;
+      pts.push({ x, y, z, land: isLand(lon, lat) });
     }
+    const ph = { lon: 121, lat: 14 }; // Philippines marker
+    const phLatR = (ph.lat * Math.PI) / 180;
+    const phLonR = (ph.lon * Math.PI) / 180;
+
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let raf = 0,
-      a = 0;
+    const tilt = 0.32;
+    const ct = Math.cos(tilt), st = Math.sin(tilt);
+    let raf = 0;
+    let a = -phLonR; // start facing the Philippines
     const draw = () => {
       raf = requestAnimationFrame(draw);
-      if (!reduced) a += 0.008;
+      if (!reduced) a -= 0.0042;
       ctx.clearRect(0, 0, size, size);
       const fg = getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || '#eee';
-      const r = size / 2 - 2,
-        ca = Math.cos(a),
-        sa = Math.sin(a);
-      ctx.strokeStyle = 'rgba(128,128,128,.4)';
+      const r = size / 2 - 2;
+      const cx = size / 2, cy = size / 2;
+      const ca = Math.cos(a), sa = Math.sin(a);
+
+      // soft rim
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = fg;
+      ctx.lineWidth = 0.6;
       ctx.beginPath();
-      ctx.arc(size / 2, size / 2, r, 0, 7);
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.stroke();
-      for (const [x, y, z] of pts) {
-        const rx = x * ca + z * sa,
-          rz = -x * sa + z * ca;
-        if (rz < 0) continue;
+
+      for (const p of pts) {
+        // rotate around Y then tilt around X
+        const rx = p.x * ca + p.z * sa;
+        const rz0 = -p.x * sa + p.z * ca;
+        const ry = p.y * ct - rz0 * st;
+        const rz = p.y * st + rz0 * ct;
+        if (rz < -0.02) continue;
+        const light = 0.35 + 0.65 * Math.max(0, rz);
         ctx.fillStyle = fg;
-        ctx.globalAlpha = 0.25 + rz * 0.75;
-        ctx.fillRect(size / 2 + rx * r - 0.6, size / 2 + y * r - 0.6, 1.4, 1.4);
+        if (p.land) {
+          ctx.globalAlpha = 0.45 + 0.55 * light;
+          const s = 1.5 + light * 0.5;
+          ctx.fillRect(cx + rx * r - s / 2, cy - ry * r - s / 2, s, s);
+        } else {
+          ctx.globalAlpha = 0.07 + 0.16 * light;
+          ctx.fillRect(cx + rx * r - 0.5, cy - ry * r - 0.5, 1, 1);
+        }
+      }
+
+      // Philippines marker
+      const mx = Math.sin(phLonR) * Math.cos(phLatR);
+      const my = Math.sin(phLatR);
+      const mz = Math.cos(phLonR) * Math.cos(phLatR);
+      const mrx = mx * ca + mz * sa;
+      const mrz0 = -mx * sa + mz * ca;
+      const mry = my * ct - mrz0 * st;
+      const mrz = my * st + mrz0 * ct;
+      if (mrz > 0.05) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#5b5fe0';
+        ctx.beginPath();
+        ctx.arc(cx + mrx * r, cy - mry * r, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 0.28;
+        ctx.beginPath();
+        ctx.arc(cx + mrx * r, cy - mry * r, 4.6, 0, Math.PI * 2);
+        ctx.fill();
       }
       ctx.globalAlpha = 1;
     };
