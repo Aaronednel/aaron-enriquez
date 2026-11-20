@@ -45,39 +45,6 @@ const Head = ({ no, label, aside }: { no: string; label: string; aside?: string 
 
 export function Hero({ go }: { go: (id: string) => void }) {
   const time = useClock();
-  const portraitRef = useRef<HTMLDivElement>(null);
-  const lens = useRef({ x: -999, y: -999, r: 0, tx: -999, ty: -999, tr: 0 });
-
-  useEffect(() => {
-    let raf = 0;
-    const loop = () => {
-      raf = requestAnimationFrame(loop);
-      const s = lens.current;
-      const el = portraitRef.current;
-      if (!el) return;
-      s.x += (s.tx - s.x) * 0.16;
-      s.y += (s.ty - s.y) * 0.16;
-      s.r += (s.tr - s.r) * 0.14;
-      el.style.setProperty('--px', s.x + 'px');
-      el.style.setProperty('--py', s.y + 'px');
-      el.style.setProperty('--pr', s.r + 'px');
-    };
-    loop();
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  const onPortraitMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    const s = lens.current;
-    s.tx = e.clientX - r.left;
-    s.ty = e.clientY - r.top;
-    s.tr = 95;
-    if (s.x < -900) {
-      s.x = s.tx;
-      s.y = s.ty;
-    }
-  };
-
   return (
     <section id="top" data-theme="dark" data-label="hero" className="hero grid12">
       <div className="hero-left">
@@ -92,24 +59,7 @@ export function Hero({ go }: { go: (id: string) => void }) {
           </div>
         </div>
       </div>
-      <div
-        ref={portraitRef}
-        className="hero-portrait"
-        data-form="portrait"
-        role="img"
-        aria-label="Particle portrait of Aaron Ednel M. Enriquez"
-        onPointerMove={onPortraitMove}
-        onPointerLeave={() => {
-          lens.current.tr = 0;
-        }}
-      >
-        <img
-          src={SITE.portraitUrl}
-          alt="Aaron Ednel M. Enriquez"
-          className="hero-portrait-reveal"
-          draggable={false}
-        />
-      </div>
+      <div className="hero-portrait" data-form="portrait" role="img" aria-label="Particle portrait of Aaron Ednel M. Enriquez" />
       <div className="hero-right">
         <span className="hero-arrow" aria-hidden="true">
           ↘

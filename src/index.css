@@ -58,17 +58,7 @@ header.navbar { position: relative; z-index: 55; }
 /* Hero */
 .grid12 { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--gap); }
 .hero { min-height: 100svh; margin-top: -80px; padding: 80px var(--gutter) calc(10vw + 3rem); align-items: center; position: relative; }
-.hero-portrait { grid-column: 4 / 9; height: 72vh; position: relative; display: grid; place-items: center; }
-.hero-portrait-reveal {
-  width: 96%;
-  height: 96%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  filter: grayscale(1) contrast(1.08) brightness(0.95);
-  -webkit-mask-image: radial-gradient(circle var(--pr, 0px) at var(--px, -999px) var(--py, -999px), rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.8) 55%, transparent 100%);
-  mask-image: radial-gradient(circle var(--pr, 0px) at var(--px, -999px) var(--py, -999px), rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.8) 55%, transparent 100%);
-}
+.hero-portrait { grid-column: 4 / 9; height: 72vh; }
 .hero-left { grid-column: 1 / 4; }
 .hero-right { grid-column: 9 / 13; padding-top: 18vh; }
 .hero-arrow { display: block; font-size: 18px; margin-bottom: 18vh; width: 16px; user-select: none; pointer-events: none; opacity: 0.7; }
