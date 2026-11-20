@@ -746,11 +746,9 @@ export function Contact({ go }: { go: (id: string) => void }) {
               AE
             </span>
             <div>
-              <div className="resume-title">
-                Aaron Ednel M. Enriquez — BSIT Student (Class of 2027) · University of the Assumption
-              </div>
+              <div className="resume-title">Aaron Enriquez — Resume</div>
               <div className="resume-sub">
-                ParishLink Capstone Project Leader · Crew Member @ McDonald&apos;s JBL
+                Full Stack Developer · BSIT &apos;27, University of the Assumption
               </div>
             </div>
           </div>
